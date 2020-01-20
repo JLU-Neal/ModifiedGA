@@ -6,8 +6,7 @@ import matplotlib.pyplot as plt  # 可视化绘制
 
 from sklearn.linear_model import LinearRegression  # 线性回归
 
-from mpl_toolkits.mplot3d import Axes3D#绘制3D点坐标
-
+from mpl_toolkits.mplot3d import Axes3D  # 绘制3D点坐标
 
 """
 # 样本数据集，第一列为x，第二列为y，在x和y之间建立回归模型
@@ -29,12 +28,20 @@ data = [
 ]
 """
 
+
 class MLR():
 
-    def __int__(self,data):
+    def __int__(self):
+        self.data
+        self.model = LinearRegression(copy_X=True, fit_intercept=True, n_jobs=1, normalize=True)
+
+
+        """
         # 生成X和y矩阵
 
         dataMat = np.array(data)
+
+
 
         X = dataMat[:, 0:2]  # 变量x
 
@@ -43,6 +50,52 @@ class MLR():
         # ========线性回归========
 
         self.model = LinearRegression(copy_X=True, fit_intercept=True, n_jobs=1, normalize=True)
+
+        self.model.fit(X, y)  # 线性回归建模
+
+        print('系数矩阵:\n', self.model.coef_)
+
+        print('线性回归模型:\n', self.model)
+
+        # 使用模型预测
+
+        predicted = self.model.predict(X)
+
+        # 绘制散点图 参数：x横轴 y纵轴
+        
+        plt.scatter(X, y, marker='x')
+
+        plt.plot(X, predicted, c='r')
+
+        # 绘制x轴和y轴坐标
+
+        plt.xlabel("x")
+
+        plt.ylabel("y")
+
+        # 显示图形
+        
+        ax = plt.figure().add_subplot(111, projection='3d')
+        ax.scatter(X[:, 0], X[:, 1], y, c='r', marker='^')  # 点为红色三角形
+        ax.scatter(X[:, 0], X[:, 1], predicted)  # 点为红色三角形
+        ax.plot_trisurf(X[:, 0], X[:, 1], predicted)
+        plt.show()
+
+        """
+
+    def insert(self, Vars, Y):#插入染色体
+        new_chrome = np.hstack((Vars, Y))
+        self.data=np.vstack((self.data, new_chrome))
+
+    def train(self):
+        # dataMat = np.array(data)
+        dataMat = self.data
+
+        X = dataMat[:, 0:2]  # 变量x
+
+        y = dataMat[:, 2]  # 变量y
+
+        # ========线性回归========
 
         self.model.fit(X, y)  # 线性回归建模
 
@@ -74,7 +127,6 @@ class MLR():
         ax.plot_trisurf(X[:, 0], X[:, 1], predicted)
         plt.show()
 
-
-    def predict(self,predict_set):
-        predicted=self.model.predict(predict_set)
+    def predict(self, predict_set):
+        predicted = self.model.predict(predict_set)
         return predicted
