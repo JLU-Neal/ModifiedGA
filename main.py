@@ -6,6 +6,7 @@ import geatpy as ea   # import geatpy
 
 from GA import MyProblem # 导入自定义问题接口
 
+#from draft import Myproblem
 
 
 if __name__ == '__main__':

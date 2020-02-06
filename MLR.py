@@ -31,10 +31,9 @@ data = [
 
 class MLR():
 
-    def __int__(self):
-        self.data
+    def __init__(self):
+        self.data=np.array([])
         self.model = LinearRegression(copy_X=True, fit_intercept=True, n_jobs=1, normalize=True)
-
 
         """
         # 生成X和y矩阵
@@ -83,17 +82,24 @@ class MLR():
 
         """
 
-    def insert(self, Vars, Y):#插入染色体
-        new_chrome = np.hstack((Vars, Y))
-        self.data=np.vstack((self.data, new_chrome))
+    def insert(self, X, Y):  # 插入染色体
+        new_chrome = np.hstack((X, Y))
+        #data = np.vstack((self.data, new_chrome))
+        if self.data.size ==0:
+            self.data=new_chrome
+        else:
+            self.data=np.vstack((self.data,new_chrome))
+
+
+
 
     def train(self):
         # dataMat = np.array(data)
         dataMat = self.data
 
-        X = dataMat[:, 0:2]  # 变量x
+        X = dataMat[:, 0:dataMat.shape[1]-1]  # 变量x
 
-        y = dataMat[:, 2]  # 变量y
+        y = dataMat[:, dataMat.shape[1]-1]  # 变量y
 
         # ========线性回归========
 
@@ -103,12 +109,13 @@ class MLR():
 
         print('线性回归模型:\n', self.model)
 
+
+        """
         # 使用模型预测
 
         predicted = self.model.predict(X)
 
         # 绘制散点图 参数：x横轴 y纵轴
-        """
         plt.scatter(X, y, marker='x')
 
         plt.plot(X, predicted, c='r')
@@ -120,12 +127,13 @@ class MLR():
         plt.ylabel("y")
 
         # 显示图形
-        """
         ax = plt.figure().add_subplot(111, projection='3d')
         ax.scatter(X[:, 0], X[:, 1], y, c='r', marker='^')  # 点为红色三角形
         ax.scatter(X[:, 0], X[:, 1], predicted)  # 点为红色三角形
         ax.plot_trisurf(X[:, 0], X[:, 1], predicted)
         plt.show()
+        """
+
 
     def predict(self, predict_set):
         predicted = self.model.predict(predict_set)
