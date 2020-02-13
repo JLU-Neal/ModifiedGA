@@ -16,28 +16,46 @@ class MLR():
     def __init__(self):
         self.data = np.array([])
         self.model = LinearRegression(copy_X=True, fit_intercept=True, n_jobs=1, normalize=True)
+        self.embeddedX=0
 
-
-    def insert(self, X, Y):  # 插入染色体
-        new_chrome = np.hstack((X, Y))
+    def insert(self, X, Y,split,datasize):  # 插入染色体
+        new_chrome = np.hstack((X[0:split,:], Y))#将已经通过适应度函数计算的分离出来
         # data = np.vstack((self.data, new_chrome))
+
+        if self.data.size == 0:
+            self.data = new_chrome
+        else:
+            self.data = np.vstack((self.data, new_chrome))
+            if self.data.shape[0]>=datasize:
+                temp=self.data[self.data.shape[0]-datasize-1:self.data.shape[0]]
+                temp=np.vstack((temp,X[split:X.size[0],:]))
+                n_components=3
+                tsne=TSNE(n_components)
+                self.embeddedX=tsne.transform(temp)
+
+    def insert(self,X,Y):
+        new_chrome = np.hstack((X, Y))  # 将已经通过适应度函数计算的分离出来
+        # data = np.vstack((self.data, new_chrome))
+
         if self.data.size == 0:
             self.data = new_chrome
         else:
             self.data = np.vstack((self.data, new_chrome))
 
-    def train(self):
+
+
+    def train(self,X,datasize):
         # dataMat = np.array(data)
-        dataMat = self.data
-
+        temp = self.data[self.data.shape[0] - datasize:,0:self.data.shape[1]-1]
+        temp = np.vstack((temp, X))
         n_components = 3
-        tsne=TSNE(n_components)
-        dataMat=tsne.transform(dataMat)
+        tsne = TSNE(n_components)
+        self.embeddedX = tsne.transform(temp)
 
 
-        X = dataMat[:, 0:dataMat.shape[1] - 1]  # 变量x
+        X = self.embeddedX[0:self.embeddedX.shape[0]-X.shape[0], :]  # 变量x
 
-        y = dataMat[:, dataMat.shape[1] - 1]  # 变量y
+        y = self.data[self.data.shape[0]-datasize:, self.data.shape[1]-1 ]  # 变量y
 
         # ========线性回归========
 
@@ -48,6 +66,9 @@ class MLR():
         print('线性回归模型:\n', self.model)
 
 
-    def predict(self, predict_set):
+    def predict(self, datasize):
+        predict_set=self.embeddedX[datasize:,:]
         predicted = self.model.predict(predict_set)
         return predicted
+
+
