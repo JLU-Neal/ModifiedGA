@@ -29,7 +29,7 @@ class MLR():
             if self.data.shape[0]>=datasize:
                 temp=self.data[self.data.shape[0]-datasize-1:self.data.shape[0]]
                 temp=np.vstack((temp,X[split:X.size[0],:]))
-                n_components=3
+                n_components=20
                 tsne=TSNE(n_components)
                 self.embeddedX=tsne.transform(temp)
 
@@ -49,8 +49,12 @@ class MLR():
         temp = self.data[self.data.shape[0] - datasize:,0:self.data.shape[1]-1]
         temp = np.vstack((temp, X))
         n_components = 3
-        tsne = TSNE(n_components)
-        self.embeddedX = tsne.transform(temp)
+        #当需要进行降维时
+        #tsne = TSNE(n_components)
+        #self.embeddedX = tsne.transform(temp)
+        #当不需要降维时
+        self.embeddedX=temp
+
 
 
         X = self.embeddedX[0:self.embeddedX.shape[0]-X.shape[0], :]  # 变量x
@@ -61,9 +65,9 @@ class MLR():
 
         self.model.fit(X, y)  # 线性回归建模
 
-        print('系数矩阵:\n', self.model.coef_)
+        #print('系数矩阵:\n', self.model.coef_)
 
-        print('线性回归模型:\n', self.model)
+        #print('线性回归模型:\n', self.model)
 
 
     def predict(self, datasize):
