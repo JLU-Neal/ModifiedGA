@@ -3,20 +3,27 @@
 import numpy as np
 import geatpy as ea
 from mlrGAtsne.MLRwithTSNE import MLR
-
+from mlrGAtsne.FitnessFun import FitnessFun
+from matplotlib import pyplot as plt
 # 自定义问题类
 class MyProblem(ea.Problem):  # 继承Problem父类
     def __init__(self):
         self.mlr=MLR()
         self.current_generation=0 #用于记录当前进化代数
+        self.fitfun=FitnessFun()
+        self.split=10
+        self.datasize=150
+
+        self.fitnessvalue=[]
+        self.regressionvalue=[]
         print("class been created1")
         name = 'DTLZ1'  # 初始化name（函数名称，可以随意设置）
         M=1
         maxormins = [1] * M  # 初始化maxormins（目标最小最大化标记列表，1：最小化该目标；-1：最大化该目标）
         Dim = 30  # 初始化Dim（决策变量维数）
         varTypes = np.array([0] * Dim)  # 初始化varTypes（决策变量的类型，0：实数；1：整数）
-        lb = [0] * Dim  # 决策变量下界
-        ub = [1000] * Dim  # 决策变量上界
+        lb = [-500] * Dim  # 决策变量下界
+        ub = [500] * Dim  # 决策变量上界
         lbin = [1] * Dim  # 决策变量下边界
         ubin = [1] * Dim  # 决策变量上边界
         # 调用父类构造方法完成实例化
@@ -25,13 +32,22 @@ class MyProblem(ea.Problem):  # 继承Problem父类
     def aimFunc(self, pop):  # 目标函数
         self.current_generation+=1
         print(self.current_generation)
-        swich_mode_generation=20
+        swich_mode_generation=10000
+
+        """
+        # 未使用代理模式
+        X = pop.Phen
+        Y = self.fitfun.Schwefel(X)
+        pop.ObjV = Y
+        """
+
+
 
         if self.current_generation>0 and self.current_generation<swich_mode_generation:
 
             # 测试sphere函数
-            Vars = pop.Phen  # 得到决策变量矩阵
-
+            X = pop.Phen  # 得到决策变量矩阵
+            """
             # 根据函数要求，每个向量中的各个元素进行平方并累加可得函数值
             X = Vars
             for index in range(Vars.shape[1]):
@@ -43,24 +59,66 @@ class MyProblem(ea.Problem):  # 继承Problem父类
             for index in range(Vars.shape[1]):
                 Y = Y + Vars[:, [index]]  # 进行累加
             # mlr=MLR(Y)#改如何添加染色体？
+            """
 
-            pop.ObjV = Y
+            if self.mlr.data.shape[0]<self.datasize or self.mlr.data.size==0:#当数据量不足以进行训练的话，先用适应度函数进行计算
+                Y=self.fitfun.Schwefel(X)
+                pop.ObjV = Y
+                self.mlr.insert(X, Y)
+                #print("PHASE I")
+            elif self.mlr.data.shape[0]>=self.datasize:
+                Y = self.fitfun.Schwefel(X[0:self.split, :])
+                sample=X[0:self.split, :]
 
-            self.mlr.insert(X, Y)
-            print("phase I")
-        elif self.current_generation==swich_mode_generation:
-            self.mlr.train()#进行训练
-            Vars=pop.Phen
-            X=Vars
-            Y=self.mlr.predict(X)
-            pop.ObjV=np.array(Y).reshape(100,1)
-            print("phase II")
-        elif self.current_generation>swich_mode_generation and self.current_generation<=500:
-            Vars=pop.Phen
-            X=Vars
-            Y=self.mlr.predict(X)
-            pop.ObjV=np.array(Y).reshape(100,1)#根据种群大小进行设定
-            print("phase III")
+                self.mlr.insert(X[0:self.split,:],Y)
+                print("PHASE II")
+                self.mlr.train(X[self.split:,:],self.datasize)
+                tempY=self.mlr.predict(self.datasize)
+                tempY=np.array(tempY).reshape(pop.Phen.shape[1]-self.split,1)
+                Y=np.vstack((Y,tempY))
+                pop.ObjV=Y
+                """
+                用于最后比较每一代的回归值与实际值
+                comparision=self.fitfun.cal(X)
+                min=999999999999999999
+                for element in comparision:
+                    if element<min:
+                        min=element
+                self.fitnessvalue.append(min)
+
+                min=999999999999999999
+                for element in Y:
+                    if element<min:
+                        min=element
+                self.regressionvalue.append(min)
+                if self.current_generation == 1499:
+                    a=np.arange(497)
+                    fig=plt.figure()
+                    plt.plot(a,self.regressionvalue,label='Regression')
+                    plt.plot(a,self.fitnessvalue,label='FitnessFun')
+                    plt.legend()
+                    plt.show(fig)
+                """
+
+                """
+                用于查看每一代的拟合效果
+                comparison = self.fitfun.cal(X)
+                print("??????????????????/")
+                print(Y)
+                print('================versus==============')
+                print(comparison)
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                a=np.arange(100)
+                fig=plt.figure()
+                plt.plot(a,Y,label='Regression')
+                plt.plot(a,comparison,label='FitnessFun')
+                plt.legend()
+                plt.show(fig)
+                print()
+                """
+
+
+
 
 
 

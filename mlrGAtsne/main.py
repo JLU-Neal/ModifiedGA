@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     Encoding = 'RI'       # 编码方式
 
-    NIND = 100            # 种群规模
+    NIND = 30            # 种群规模
 
     Field = ea.crtfld(Encoding, problem.varTypes, problem.ranges, problem.borders) # 创建区域描述器
 
@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     myAlgorithm = ea.soea_DE_rand_1_L_templet(problem, population) # 实例化一个算法模板对象
 
-    myAlgorithm.MAXGEN = 500 # 最大进化代数
+    myAlgorithm.MAXGEN = 10000 # 最大进化代数
 
     myAlgorithm.mutOper.F = 0.5 # 差分进化中的参数F
 
