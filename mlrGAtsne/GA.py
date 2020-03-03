@@ -72,8 +72,8 @@ class MyProblem(ea.Problem):  # 继承Problem父类
 
                 self.mlr.insert(X[0:self.split,:],Y)
                 print("PHASE II")
-                self.mlr.train(X[self.split:,:],self.datasize)
-                tempY=self.mlr.predict(self.datasize)
+                self.mlr.train_with_filter(X[self.split:,:],self.datasize)
+                tempY=self.mlr.predict(pop.Phen.shape[1]-self.split)
                 tempY=np.array(tempY).reshape(pop.Phen.shape[1]-self.split,1)
                 Y=np.vstack((Y,tempY))
                 pop.ObjV=Y
