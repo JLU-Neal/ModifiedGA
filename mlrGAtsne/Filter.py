@@ -5,7 +5,7 @@ from sklearn import metrics
 class Filter():
     def randomFilter(self,temp,y):
         origin_size=temp.shape[0]
-        post_filter_size=int(origin_size/10)
+        post_filter_size=int(origin_size/12)
         X=np.array([])
         Y=np.array([])
         for index in range(post_filter_size):
@@ -22,7 +22,7 @@ class Filter():
     def APFilter(self,temp,Y):
         X=temp.copy()
         # Compute Affinity Propagation
-        af = AffinityPropagation(preference=-0.001,damping=.9).fit(X)
+        af = AffinityPropagation(damping=.5).fit(X)
         cluster_centers_indices = af.cluster_centers_indices_
         labels = af.labels_
         cluster_center=np.array([])
@@ -35,6 +35,11 @@ class Filter():
             else:
                 cluster_center=np.vstack((cluster_center,temp[cluster_centers_indices[k]]))
                 value=np.vstack((value,Y[cluster_centers_indices[k]]))
+
+        if n_clusters_<=10:
+            cluster_center=temp
+            value=Y
+        print(n_clusters_)
         return cluster_center,value
 
 

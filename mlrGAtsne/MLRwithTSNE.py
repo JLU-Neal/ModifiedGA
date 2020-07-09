@@ -9,6 +9,7 @@ from sklearn.linear_model import LinearRegression  # 线性回归
 from mpl_toolkits.mplot3d import Axes3D  # 绘制3D点坐标
 from mlrGAtsne.TSNE import TSNE
 from mlrGAtsne.Filter import Filter
+from mlrGAtsne.Configuration import Configuration
 
 
 class MLR():
@@ -45,17 +46,19 @@ class MLR():
 
 
 
-    def train(self,X,datasize):
+    def train(self,X,datasize,con:Configuration):
         # dataMat = np.array(data)
         temp = self.data[self.data.shape[0] - datasize:,0:self.data.shape[1]-1]
         temp = np.vstack((temp, X))
 
         n_components = 3
-        #当需要进行降维时
-        tsne = TSNE(n_components)
-        self.embeddedX = tsne.transform(temp)
-        #当不需要降维时
-        #self.embeddedX=temp
+        if con.mode!='mlr_sga':
+            #当需要进行降维时
+            tsne = TSNE(n_components,con)
+            self.embeddedX = tsne.transform(temp)
+        else:
+            #当不需要降维时
+            self.embeddedX=temp
 
 
 
@@ -64,7 +67,8 @@ class MLR():
         y = self.data[self.data.shape[0]-datasize:, self.data.shape[1]-1 ]  # 变量y
 
         # ========线性回归========
-
+        #加入随机筛选
+        [X, y] = self.filter.randomFilter(X, y)
         self.model.fit(X, y)  # 线性回归建模
 
         #print('系数矩阵:\n', self.model.coef_)
@@ -72,7 +76,7 @@ class MLR():
         #print('线性回归模型:\n', self.model)
 
 
-    def train_with_filter(self,X,datasize):
+    def train_with_filter(self,X,datasize,con:Configuration):
         # dataMat = np.array(data)
         temp = self.data[self.data.shape[0] - datasize:, :]
         #temp=self.filter.APFilter(temp)
@@ -83,7 +87,7 @@ class MLR():
         """
         
         """
-        tsne = TSNE(n_components)
+        tsne = TSNE(n_components,con)
         self.embeddedX = tsne.transform(np.vstack((temp[:, :temp.shape[1] - 1], X)))
         X = self.embeddedX[0:self.embeddedX.shape[0] - X.shape[0], :]
         y = temp[:, temp.shape[1] - 1]  # 变量y

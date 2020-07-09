@@ -7,20 +7,23 @@ import geatpy as ea   # import geatpy
 from mlrGAtsne.GA import MyProblem # 导入自定义问题接口
 
 #from draft import Myproblem
+import csv
+
+from mlrGAtsne.Configuration import Configuration
 
 
-if __name__ == '__main__':
+def main(con:Configuration):
 
     """================================实例化问题对象==========================="""
 
-    problem = MyProblem() # 生成问题对象
+    problem = MyProblem(con) # 生成问题对象
 
     """==================================种群设置==============================="""
 
     Encoding = 'RI'       # 编码方式
 
-    NIND = 30            # 种群规模
-
+    #NIND = 30            # 种群规模
+    NIND=con.NIND
     Field = ea.crtfld(Encoding, problem.varTypes, problem.ranges, problem.borders) # 创建区域描述器
 
     population = ea.Population(Encoding, Field, NIND) # 实例化种群对象（此时种群还没被初始化，仅仅是完成种群对象的实例化）
@@ -29,11 +32,15 @@ if __name__ == '__main__':
 
     myAlgorithm = ea.soea_DE_rand_1_L_templet(problem, population) # 实例化一个算法模板对象
 
-    myAlgorithm.MAXGEN = 10000 # 最大进化代数
+    #myAlgorithm.MAXGEN = 200 # 最大进化代数
+    myAlgorithm.MAXGEN=con.MAXGEN
 
     myAlgorithm.mutOper.F = 0.5 # 差分进化中的参数F
 
     myAlgorithm.recOper.XOVR = 0.7 # 重组概率
+
+    myAlgorithm.drawing=0 # 设置绘图方式（0：不绘图；1：绘制结果图；2：绘制过程动画）
+
 
     """===========================调用算法模板进行种群进化======================="""
 
@@ -61,4 +68,28 @@ if __name__ == '__main__':
 
     print('评价次数：%s'%(myAlgorithm.evalsNum))
 
+    print('实际评价次数：%s'%(problem.fitfun.count))
+
     print('时间已过 %s 秒'%(myAlgorithm.passTime))
+
+    """
+        with open("performance.csv", "a", newline='') as csvfile2:
+        writer = csv.writer(csvfile2)
+        writer.writerow([con.function + ' based on ' + con.mode, problem.fitfun.count, myAlgorithm.passTime])
+    
+    """
+
+    """
+   
+    """
+    # 保存每一代信息
+    with open(con.function + ' based on ' + con.mode + ".csv", "a", newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        for index in range(len(problem.fitnessvalue)):  # not tested
+            writer.writerow([str(index), int(problem.fitnessvalue[index])])
+    print(con.function + ' based on ' + con.mode + ' is done.')
+
+
+
+if __name__ == '__main__':
+    main()
